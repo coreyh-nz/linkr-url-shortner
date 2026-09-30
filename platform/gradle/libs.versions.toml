@@ -14,6 +14,7 @@ kotlin-logging = "8.0.4"
 kotest = "6.2.5"
 mockk = "1.14.11"
 spring-mockk = "5.0.1"
+test-containers = "2.0.5"
 
 [libraries]
 # spring
@@ -33,6 +34,9 @@ kotest-assertions-json = { module = "io.kotest:kotest-assertions-json", version.
 kotest-extensions-spring = { module = "io.kotest:kotest-extensions-spring", version.ref = "kotest" }
 mockk = { module = "io.mockk:mockk-jvm", version.ref = "mockk" }
 spring-mockk = { module = "com.ninja-squad:springmockk", version.ref = "spring-mockk" }
+
+test-containers-bom = { module = "org.testcontainers:testcontainers-bom", version.ref = "test-containers" }
+test-containers-postgresql = { module = "org.testcontainers:testcontainers-postgresql" }
 
 [plugins]
 # kotlin
