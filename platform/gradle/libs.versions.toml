@@ -1,0 +1,28 @@
+[versions]
+# language
+kotlin = "2.4.20"
+java = "26"
+
+# framework
+spring-boot = "4.1.1"
+spring-dependency-management = "1.1.7"
+
+[libraries]
+# spring
+spring-boot-starter = { module = "org.springframework.boot:spring-boot-starter" }
+
+# kotlin
+kotlin-reflect = { module = "org.jetbrains.kotlin:kotlin-reflect" }
+
+# testing
+spring-boot-starter-test = { module = "org.springframework.boot:spring-boot-starter-test" }
+
+[plugins]
+# kotlin
+kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
+kotlin-spring = { id = "org.jetbrains.kotlin.plugin.spring", version.ref = "kotlin" }
+
+
+# spring
+spring-boot = { id = "org.springframework.boot", version.ref = "spring-boot" }
+spring-dependency-management = { id = "io.spring.dependency-management", version.ref = "spring-dependency-management" }
