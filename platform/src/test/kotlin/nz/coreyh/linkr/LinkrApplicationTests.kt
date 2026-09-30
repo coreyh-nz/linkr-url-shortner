@@ -1,11 +1,10 @@
 package nz.coreyh.linkr
 
-import org.junit.jupiter.api.Test
+import io.kotest.core.spec.style.FunSpec
 import org.springframework.boot.test.context.SpringBootTest
 
 @SpringBootTest
-class LinkrApplicationTests {
-    @Test
-    fun contextLoads() {
-    }
-}
+class LinkrApplicationTests :
+    FunSpec({
+        test("context loads")
+    })

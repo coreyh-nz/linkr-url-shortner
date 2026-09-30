@@ -6,6 +6,10 @@ plugins {
     // framework
     alias(libs.plugins.spring.boot)
     alias(libs.plugins.spring.dependency.management)
+
+    // testing
+    alias(libs.plugins.kotest)
+    jacoco
 }
 
 group = "nz.coreyh"
@@ -40,10 +44,34 @@ dependencies {
     // kotlin
     implementation(libs.kotlin.reflect)
 
+    // logging
+    implementation(libs.kotlin.logging)
+
     // testing
     testImplementation(libs.spring.boot.starter.test)
+    testImplementation(libs.kotest.runner.junit)
+    testImplementation(libs.kotest.assertions.core)
+    testImplementation(libs.kotest.assertions.json)
+    testImplementation(libs.kotest.extensions.spring)
+    testImplementation(libs.mockk)
+    testImplementation(libs.spring.mockk)
+}
+
+configurations.testImplementation {
+    exclude(group = "org.mockito")
 }
 
 tasks.withType<Test> {
     useJUnitPlatform()
+    finalizedBy(tasks.jacocoTestReport)
+}
+
+tasks.jacocoTestReport {
+    dependsOn(tasks.test)
+    executionData(tasks.test.get())
+    reports {
+        xml.required = true
+        html.required = true
+        csv.required = false
+    }
 }
