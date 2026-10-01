@@ -97,6 +97,8 @@ val testSuites =
 dependencies {
     // spring
     implementation(libs.spring.boot.starter)
+    implementation(libs.spring.boot.starter.web)
+    implementation(libs.spring.boot.starter.actuator)
 
     // kotlin
     implementation(libs.kotlin.reflect)

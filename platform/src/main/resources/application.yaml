@@ -1,3 +1,22 @@
 spring:
   application:
     name: linkr
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health
+  endpoint:
+    health:
+      probes:
+        enabled: true
+  health:
+    livenessstate:
+      enabled: true
+    readinessstate:
+      enabled: true
+
+linkr:
+  max-code-attempts: 5
+  code-length: 6
