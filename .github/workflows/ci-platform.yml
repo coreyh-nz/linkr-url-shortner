@@ -1,0 +1,146 @@
+name: CI (platform)
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'platform/**'
+      - '.github/workflows/ci-platform.yml'
+  pull_request:
+    paths:
+      - 'platform/**'
+      - '.github/workflows/ci-platform.yml'
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+defaults:
+  run:
+    working-directory: platform
+
+jobs:
+  test-unit:
+    name: Unit tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-java@v6
+        with:
+          distribution: temurin
+          java-version: 26
+
+      - uses: gradle/actions/setup-gradle@v6
+
+      - name: Make gradlew executable
+        run: chmod +x gradlew
+
+      - name: Run unit tests
+        run: ./gradlew testUnit --no-daemon
+
+      - name: Upload unit test results
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: test-results-unit
+          path: platform/build/test-results/testUnit
+
+      - name: Upload unit coverage data
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: jacoco-exec-unit
+          path: platform/build/jacoco/testUnit.exec
+          if-no-files-found: warn
+
+  test-integration:
+    name: Integration tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-java@v6
+        with:
+          distribution: temurin
+          java-version: 26
+
+      - uses: gradle/actions/setup-gradle@v6
+
+      - name: Make gradlew executable
+        run: chmod +x gradlew
+
+      - name: Run integration tests
+        run: ./gradlew testIntegration --no-daemon
+
+      - name: Upload integration test results
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: test-results-integration
+          path: platform/build/test-results/testIntegration
+
+      - name: Upload integration coverage data
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: jacoco-exec-integration
+          path: platform/build/jacoco/testIntegration.exec
+
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: docker/setup-buildx-action@v4
+
+      - name: Build image
+        uses: docker/build-push-action@v7
+        with:
+          context: platform
+          push: false
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+  coverage-report:
+    name: Combined coverage report
+    needs: [ test-unit, test-integration ]
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-java@v6
+        with:
+          distribution: temurin
+          java-version: 26
+
+      - uses: gradle/actions/setup-gradle@v6
+
+      - name: Download unit coverage data
+        uses: actions/download-artifact@v8
+        continue-on-error: true
+        with:
+          name: jacoco-exec-unit
+          path: platform/build/jacoco
+
+      - name: Download integration coverage data
+        uses: actions/download-artifact@v8
+        continue-on-error: true
+        with:
+          name: jacoco-exec-integration
+          path: platform/build/jacoco
+
+      - name: Make gradlew executable
+        run: chmod +x gradlew
+
+      - name: Generate combined coverage report
+        run: ./gradlew jacocoTestReport -x testUnit -x testIntegration --no-daemon
+
+      - name: Upload combined coverage report
+        uses: actions/upload-artifact@v7
+        with:
+          name: jacoco-report
+          path: platform/build/reports/jacoco/jacocoTestReport

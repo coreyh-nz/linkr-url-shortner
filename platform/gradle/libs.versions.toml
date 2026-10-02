@@ -1,0 +1,53 @@
+[versions]
+# language
+kotlin = "2.4.20"
+java = "26"
+
+# framework
+spring-boot = "4.1.1"
+spring-dependency-management = "1.1.7"
+
+# logging
+kotlin-logging = "8.0.4"
+
+# testing
+kotest = "6.2.5"
+mockk = "1.14.11"
+spring-mockk = "5.0.1"
+test-containers = "2.0.5"
+
+[libraries]
+# spring
+spring-boot-starter = { module = "org.springframework.boot:spring-boot-starter" }
+spring-boot-starter-web = { module = "org.springframework.boot:spring-boot-starter-web" }
+spring-boot-starter-actuator = { module = "org.springframework.boot:spring-boot-starter-actuator" }
+
+# kotlin
+kotlin-reflect = { module = "org.jetbrains.kotlin:kotlin-reflect" }
+
+# logging
+kotlin-logging = { module = "io.github.oshai:kotlin-logging-jvm", version.ref = "kotlin-logging" }
+
+# testing
+spring-boot-starter-test = { module = "org.springframework.boot:spring-boot-starter-test" }
+kotest-runner-junit = { module = "io.kotest:kotest-runner-junit6", version.ref = "kotest" }
+kotest-assertions-core = { module = "io.kotest:kotest-assertions-core", version.ref = "kotest" }
+kotest-assertions-json = { module = "io.kotest:kotest-assertions-json", version.ref = "kotest" }
+kotest-extensions-spring = { module = "io.kotest:kotest-extensions-spring", version.ref = "kotest" }
+mockk = { module = "io.mockk:mockk-jvm", version.ref = "mockk" }
+spring-mockk = { module = "com.ninja-squad:springmockk", version.ref = "spring-mockk" }
+
+test-containers-bom = { module = "org.testcontainers:testcontainers-bom", version.ref = "test-containers" }
+test-containers-postgresql = { module = "org.testcontainers:testcontainers-postgresql" }
+
+[plugins]
+# kotlin
+kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
+kotlin-spring = { id = "org.jetbrains.kotlin.plugin.spring", version.ref = "kotlin" }
+
+# spring
+spring-boot = { id = "org.springframework.boot", version.ref = "spring-boot" }
+spring-dependency-management = { id = "io.spring.dependency-management", version.ref = "spring-dependency-management" }
+
+# testing
+kotest = { id = "io.kotest", version.ref = "kotest" }

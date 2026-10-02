@@ -1,0 +1,183 @@
+# yaml-language-server: $schema=https://coderabbit.ai/integrations/schema.v2.json
+language: en-NZ
+early_access: false
+
+reviews:
+  profile: chill
+  request_changes_workflow: true
+  high_level_summary: true
+  changed_files_summary: false
+  sequence_diagrams: false
+  estimate_code_review_effort: false
+  in_progress_fortune: false
+  poem: false
+  enable_prompt_for_ai_agents: false
+  pre_merge_checks:
+    docstrings:
+      mode: off
+  finishing_touches:
+    docstrings:
+      enabled: false
+    unit_tests:
+      enabled: false
+
+
+  path_filters:
+    - "platform/**/*.kt"
+    - "platform/**/*.kts"
+    - "platform/**/*.toml"
+    - "platform/**/*.{yml,yaml}"
+    - "platform/Dockerfile"
+    - "**/README.md"
+    - "!platform/build/**"
+    - "!platform/.gradle/**"
+    - "!platform/out/**"
+
+  auto_review:
+    enabled: true
+    auto_incremental_review: true
+    drafts: false
+    ignore_usernames:
+      - dependabot
+      - "dependabot[bot]"
+
+  path_instructions:
+    - path: "platform/**/*.kt"
+      instructions: |
+        Kotlin best practices to check:
+
+        Language correctness:
+        - Null safety: Ensure proper use of nullable types, avoid unnecessary null assertions (!!)
+        - Immutability: Prefer val over var, use immutable collections where possible
+        - Value classes: If a type models a validated domain primitive (an ID, code,
+          email, URL, etc.), prefer an @JvmInline value class with a private
+          constructor, a validating factory function that returns null (or a Result/
+          sealed type) on failure, and a separate "trusted" factory reserved for
+          values already known to be valid (e.g. read from storage). Flag a trusted
+          factory being called on unvalidated input.
+        - Sealed types for outcomes: Prefer a sealed interface/class (with data
+          objects/classes per case) to represent every possible outcome of an
+          operation, rather than throwing exceptions for expected/business-level
+          failures. Reserve exceptions for truly unexpected/programmer errors.
+
+        Architecture (if the project follows a layered / ports-and-adapters style):
+        - Inner layers (domain, application/business logic) should not depend on
+          outer layers (web, persistence, framework-specific types).
+        - Business logic should depend on abstractions (interfaces) for things like
+          persistence, clocks, and ID/code generation, not on concrete
+          implementations, so it stays unit-testable without infrastructure.
+
+        Code quality:
+        - Complexity: Flag functions with high cyclomatic complexity (>10)
+        - Dead code: Identify unused functions, variables, and imports
+        - Naming conventions: Follow Kotlin naming conventions (camelCase for functions/properties, PascalCase for classes)
+
+        Performance:
+        - Avoid unnecessary allocations in hot paths
+        - Collection usage: Use appropriate collection types and operations (prefer sequences for large collections with multiple operations)
+
+        API and design:
+        - Visibility modifiers: Use appropriate visibility (prefer private/internal over public)
+        - Unnecessary public API: Flag overly exposed APIs
+
+        Error handling:
+        - Prefer sealed result types (see above) for expected failures; reserve
+          exceptions for truly unexpected/programmer errors
+        - Avoid swallowing exceptions
+
+        Logging:
+        - Use a structured logger (not println) consistently across the codebase
+        - Prefer lazy/lambda log message construction over eagerly concatenated
+          strings, especially at debug/trace level
+
+        Security:
+        - No hardcoded secrets or credentials
+        - Use SecureRandom instead of Random for security-sensitive operations
+        - Avoid unsafe deserialization
+
+    - path: "platform/**/*.kts"
+      instructions: |
+        Kotlin Gradle script (build.gradle.kts, settings.gradle.kts) best practices:
+
+        - Prefer a version catalog (libs.versions.toml) over hardcoded dependency
+          versions or module coordinates
+        - Null safety: Ensure proper use of nullable types, avoid unnecessary null assertions (!!)
+        - Immutability: Prefer val over var
+        - Flag deprecated Gradle APIs or repositories (e.g. jcenter(), sunset in 2022,
+          use mavenCentral)
+        - Flag outdated dependency versions with known vulnerabilities
+
+    - path: "platform/**/*Test*.kt"
+      instructions: |
+        Test-specific conventions to check for (adjust framework names below if the
+        project uses a different stack, e.g. JUnit/Mockito instead of Kotest/MockK):
+
+        - Framework: group tests by the method under test, with a nested
+          context/describe block per method and one test per behavior.
+        - One behavior per test. If a method short-circuits before calling a
+          dependency under some condition, give that a separate paired test right
+          below the behavior test, named along the lines of "does not call X when
+          <condition>", and assert the dependency was never invoked rather than
+          folding that assertion into the behavior test.
+        - Arrange/Act/Assert with a blank line between each section.
+        - Use shared test fixture/builder functions for constructing valid/invalid
+          domain objects and fixed clock values, instead of constructing them (or
+          calling Instant.now()/Clock.System.now()) inline in every test.
+        - Name raw/unparsed inputs after what they actually are (e.g. rawX for an
+          unvalidated string) rather than a name implying they're already a
+          validated domain type.
+        - Use data-driven/table tests for a set of inputs that exercise genuinely
+          different conditions (e.g. different kinds of invalid input), but don't
+          sweep a numeric range or a list of equivalent cases just to inflate test
+          count — collapse those into one representative case.
+        - If the codebase models outcomes with sealed result types rather than
+          exceptions, assert on the returned value directly rather than wrapping
+          calls in assertThrows-style helpers.
+
+    - path: "platform/**/*.toml"
+      instructions: |
+        Gradle version catalog (libs.versions.toml) best practices:
+
+        - Flag duplicate or unused version/library/plugin entries
+        - Flag a dependency declared with a hardcoded version elsewhere in the
+          build instead of going through this catalog
+        - Flag outdated versions with known vulnerabilities
+        - Keep related entries grouped and consistently named (e.g. a library and
+          its matching plugin sharing a version ref)
+
+    - path: "platform/**/*.{yml,yaml}"
+      instructions: |
+        Application/CI configuration best practices:
+
+        - No hardcoded secrets, credentials, tokens, or connection strings; these
+          should come from environment variables or a secret manager
+        - Flag overly permissive settings (e.g. all actuator endpoints exposed,
+          verbose error responses enabled in a non-dev profile)
+        - Flag profile-specific overrides that look inconsistent with other
+          profiles (e.g. a setting only present in one environment)
+
+    - path: "platform/Dockerfile"
+      instructions: |
+        Dockerfile best practices:
+
+        - Pin base image versions (avoid floating tags like `latest`)
+        - Prefer a multi-stage build so build-time tooling doesn't end up in the
+          final image
+        - Run as a non-root user in the final image where possible
+        - Avoid baking secrets, credentials, or .env files into image layers
+        - Minimize layers and avoid unnecessary packages/caches in the final image
+        - Flag copying more of the build context than the image actually needs
+          (should be paired with a .dockerignore)
+
+    - path: "**/README.md"
+      instructions: |
+        Documentation best practices:
+
+        - Flag setup/run instructions that look out of date vs. the actual build
+          files (e.g. a different Java/Gradle version, a renamed script or task)
+        - Flag broken or clearly outdated links
+        - Prefer concise, accurate instructions over exhaustive prose; flag
+          sections that duplicate what's better expressed as runnable code/config
+
+chat:
+  art: false
